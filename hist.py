@@ -38,23 +38,38 @@ def main():
 
 	N = end-start+1
 	counter = np.zeros(binsCount)
+	total   = np.zeros(N)
 	
 	step = float(end-start)/binsCount
 	
 	bins = [start + step*i for i in range(1, binsCount+1)]
+
+	for e in data:
+		i = 0
+		index = int(e - start)
+		if index>0 or index < N:
+			total[index] += 1
+		while e>bins[i]:
+			#print e, bins[i]
+			i += 1
+		counter[i] += 1
+		
+	
+	print "###########################"
+	print "# Statistics"
+	print "###########################"
+	print "start: ", start
+	print "end: ", end
+	print '--------------------'
+	print ','.join([str(f) for f in total])
 	
 	print "###########################"
 	print "# Bins"
 	print "###########################"
 	for b in bins:
 		print b
+	#tries   = np.zeros(N)
 
-	for e in data:
-		i = 0
-		while e>bins[i]:
-			#print e, bins[i]
-			i += 1
-		counter[i] += 1
 	
 	print "###########################"
 	print "# Hist"
