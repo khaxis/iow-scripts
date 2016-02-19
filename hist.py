@@ -3,42 +3,64 @@
 import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
+import pylab as P
 import sys
+from optparse import OptionParser
 
+def main():
+	
+	usage = "usage: %prog [options] "
+	parser = OptionParser(usage)
+	parser.add_option("-k", "--column", dest="column",
+					help="K")
+	parser.add_option("-b", "--bins", dest="bins",
+					help="B")
+	parser.add_option("-s", "--separator", dest="separator",
+					help="S")
+	
+	(options, args) = parser.parse_args()
+	
+	
+	columnNumber    = int([x for x in [options.column, 1] if x is not None][0])
+	binsCount    = int([x for x in [options.bins, 10] if x is not None][0])
+	separator       = [x for x in [options.separator, '\t'] if x is not None][0]
+	
+	#############################
+	
+	data = []
+	for l in sys.stdin:
+		#uuid, checkIn, duration, success = l.rstrip("\n").split("\t")
+		e = float(l.rstrip("\n").split(separator)[columnNumber-1])
+		data.append(e)
 
-data = []
-for l in sys.stdin:
-	#uuid, checkIn, duration, success = l.rstrip("\n").split("\t")
-	uuid, dow, hour, ci_dow, success = l.rstrip("\n").split("\t")
-	e = dict()
-	e['uuid'], e['dow'], e['hour'], e['ci_dow'], e['success'] = uuid, int(dow), int(hour), int(ci_dow), int(success)
-	data.append(e)
+	start = min(data)
+	end   = max(data)
 
-key = 'ci_dow'
+	N = end-start+1
+	counter = np.zeros(binsCount)
+	
+	step = float(end-start)/binsCount
+	
+	bins = [start + step*i for i in range(1, binsCount+1)]
+	
+	print "###########################"
+	print "# Bins"
+	print "###########################"
+	for b in bins:
+		print b
 
-allValues = [e[key] for e in data]
-start = min(allValues)
-end = max(allValues)
-N = end - start + 1
-
-tries   = np.zeros(N)
-successes = np.zeros(N)
-probs   = np.zeros(N)
-
-for e in data:
-	index = e[key] - start
-	if index<0 or index >= N:
-		continue
-	tries[index] += 1
-	successes[index] += e['success']
-	probs[index] = float(successes[index])/tries[index]
-
-coef = max(tries)
-allValues = np.array(range(start, end+1))
-
-plt.plot(allValues, tries, 'r')
-plt.plot(allValues, successes, 'g')
-plt.plot(allValues, probs*coef, 'b')
-
-plt.show()
-
+	for e in data:
+		i = 0
+		while e>bins[i]:
+			#print e, bins[i]
+			i += 1
+		counter[i] += 1
+	
+	print "###########################"
+	print "# Hist"
+	print "###########################"
+	for c in counter:
+		print c
+	
+if __name__ == "__main__":
+	main()
